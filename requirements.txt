@@ -1,0 +1,4 @@
+dgl==1.0.1+cu117
+scikit-learn==1.2.1
+torch==1.13.1+cu116
+numpy==1.22.4
