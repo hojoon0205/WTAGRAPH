@@ -44,21 +44,24 @@ class GraphLoader:
         
         #------ 4. load edge feature
         ef = np.load('./data/feat_data/'  + args.db_name + '/' + args.graph_name + '_edge_feat.npy')
+        #ef = ef[:, :1600]
+        if args.reduce_edge_feature == 1:
+          ef = np.concatenate([ef[:, :1600], ef[:, 3200:]], 1)
         ef = th.from_numpy(ef).to('cuda:0')
         print('edge feature shape:', ef.shape)
 
         #------ 5. load edge label
-        e_label = np.load('./data/feat_data/'  + args.db_name + '/' + args.graph_name + '_edge_label.npy').tolist()
-        e_label = th.tensor(e_label).to('cuda:0')
-        print('edge labels shape:', e_label.shape)
+        self.e_label = np.load('./data/feat_data/'  + args.db_name + '/' + args.graph_name + '_edge_label.npy').tolist()
+        self.e_label = th.tensor(self.e_label).to('cuda:0')
+        print('edge labels shape:', self.e_label.shape)
 
         #------ 6. prepare train test val mask
-        train_mask, test_mask, val_mask = self._split_dataset(e_label, (args.r_train, args.r_test, args.r_val))
+        train_mask, test_mask, val_mask = self.split_dataset(self.e_label, (args.r_train, args.r_test, args.r_val))
 
         print('***************************loading completed***************************\n')
-        return g, nf, ef, e_label, train_mask, test_mask, val_mask
+        return g, nf, ef, self.e_label, train_mask, test_mask, val_mask
 
-    def _split_dataset(self, labels, ratio_tuple):   
+    def split_dataset(self, labels, ratio_tuple):   
         shuffle_list = [i for i in range(labels.shape[0])]
         random.shuffle(shuffle_list)
         train_ct = int(len(shuffle_list) * ratio_tuple[0])

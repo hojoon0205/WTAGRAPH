@@ -44,8 +44,7 @@ def start_train(args):
     dur, max_acc = [], -1
     for epoch in range(args.n_epochs):
         model.train()
-        if epoch >= 3:
-            t0 = time.time()
+        t0 = time.time()
         # forward
         n_logits, e_logits = model(nf, ef)
         loss = loss_fcn(e_logits[train_mask], e_label[train_mask])
@@ -54,8 +53,7 @@ def start_train(args):
         loss.backward()
         optimizer.step()
 
-        if epoch >= 3:
-            dur.append(time.time() - t0)
+        dur.append(time.time() - t0)
 
         acc, predictions, labels = evaluate(model, g, nf, ef, e_label, val_mask)
 
@@ -65,8 +63,10 @@ def start_train(args):
             th.save(model.state_dict(), './output/best.model.' + args.model_name)
 
         print("Epoch {:05d} | Time(s) {:.4f} | Loss {:.4f} | Accuracy {:.4f} | "
-              "ETputs(KTEPS) {:.2f}". format(epoch, np.mean(dur), loss.item(),
+              "ETputs(KTEPS) {:.2f}". format(epoch, dur[-1], loss.item(),
                                              acc, n_edges / np.mean(dur) / 1000))
+
+    print("Inference time: avg time {:.4f}, stdev time {:.4f}".format(np.mean(dur), np.std(dur)))
 
     # load the best model
     best_model = WTAGNN(g, input_node_feat_size, input_edge_feat_size, args.n_hidden, n_classes, 

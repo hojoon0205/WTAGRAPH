@@ -1,4 +1,5 @@
 import dgl
+import time
 import torch as th
 import torch.nn.functional as F
 import numpy as np
@@ -62,8 +63,16 @@ def eval_saved_model(args):
     best_model.load_state_dict(th.load( './output/best.model.' + args.model_name))
     print('model load from: ./output/best.model.' + args.model_name )
 
-    acc, predictions, labels = evaluate(best_model, g, nf, ef, e_label, test_mask)
-    precision, recall, tnr, tpr, f1 = performance(predictions.tolist(), labels.tolist(), acc)
+    run_times = []
+    for i in range(100):
+      train_mask, test_mask, val_mask = gloader.split_dataset(gloader.e_label, (args.r_train, args.r_test, args.r_val))
+      t0 = time.time()
+      acc, predictions, labels = evaluate(best_model, g, nf, ef, e_label, test_mask)
+      run_time = (time.time() - t0)
+      precision, recall, tnr, tpr, f1 = performance(predictions.tolist(), labels.tolist(), acc)
+      print("time: {:.4f}".format(run_time))
+      run_times += [run_time]
+    print("Inference time: avg time {:.4f} stdev {:.4f}".format(np.mean(run_times), np.std(run_times)))
     
 
 ### in the inductive evaluation, we first load the pre-trained model and the corresponding training graph

@@ -122,10 +122,13 @@ class WTAGNN(nn.Module):
                  n_layers,  activation, dropout):
         super(WTAGNN, self).__init__()
         self.layers = nn.ModuleList()
-        self.layers.append(WTAGNNLayer(g, input_node_feat_size, input_edge_feat_size, n_hidden, activation, dropout))
-        for i in range(n_layers - 1):
-            self.layers.append(WTAGNNLayer(g, n_hidden, n_hidden, n_hidden, activation, dropout))
-        self.layers.append(WTAGNNLayer(g, n_hidden, n_hidden, n_classes, None, dropout))
+        if n_layers == 0:
+            self.layers.append(WTAGNNLayer(g, input_node_feat_size, input_edge_feat_size, n_classes, None, dropout))
+        else:
+            self.layers.append(WTAGNNLayer(g, input_node_feat_size, input_edge_feat_size, n_hidden, activation, dropout))
+            for i in range(n_layers - 1):
+                self.layers.append(WTAGNNLayer(g, n_hidden, n_hidden, n_hidden, activation, dropout))
+            self.layers.append(WTAGNNLayer(g, n_hidden, n_hidden, n_classes, None, dropout))
 
     def forward(self, nf, ef):
         for layer in self.layers:

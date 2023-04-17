@@ -1,6 +1,7 @@
 import argparse
 from gnn.train import start_train, start_train_cv
 from gnn.eval import eval_saved_model, eval_model_inductive
+import numpy as np
 
 def get_args():
     parser = argparse.ArgumentParser(description='Model Implementation')
@@ -21,6 +22,7 @@ def get_args():
     parser.add_argument("--model_name", type=str, default='tmp_model_name',   help="model_name")   
     parser.add_argument("--file_to_write", type=str, default='',   help="file_to_write")   
     parser.add_argument("--fold", type=int, default=5,  help="# of cv fold")
+    parser.add_argument("--reduce_edge_feature", type=int, default=0, help="0: None, 1: reduce the edge's feature size into 1666 from 3266")
     args = parser.parse_args()
     return args
 
@@ -41,7 +43,7 @@ print(args)
 ### Mode 1: regular training 
 ### with the default args, you will train a model on the full graph
 
-# start_train(args)
+start_train(args)
 
 
 ### Mode 2: cross-validation training 
@@ -55,7 +57,7 @@ print(args)
 ### Mode 1: eval a pre-trained model on the full training graph
 ### with the default args, you will evaluate the pre-trained model on the full graph
 
-# eval_saved_model(args)
+eval_saved_model(args)
 
 
 ### Mode 2: eval  a pre-trained model inductively on unseen (during training) edges
@@ -64,6 +66,6 @@ print(args)
 
 # args.graph_name = 'rand5k' ## in this mode, graph_name meant to be the training graph
 # args.g_to_merge = 'full'   ## in this mode, g_to_merge meant to be the full graph (check more comments in below func)
-eval_model_inductive(args) 
+# eval_model_inductive(args) 
 
 print('\ndone...')
